@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import { MatchSimple } from "./TBATypes";
+import { MatchSimple, Team } from "./TBATypes";
 import axios from "axios";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 
@@ -9,6 +9,18 @@ const queryClient = new QueryClient();
 const fetchData = async (eventKey: string): Promise<MatchSimple[]> => {
   const response = await axios.get(
     `https://www.thebluealliance.com/api/v3/event/${eventKey}/matches/simple`,
+    {
+      headers: {
+        "X-TBA-Auth-Key":
+          "1EhUOwczJi4vDUXza94fAo7s4UFrKgBrTJ6A3MTeYR0WrgzlyGR0Tzyl1TN2P6Tu",
+      },
+    }
+  );
+  return response.data;
+};
+const fetchTeams = async (eventKey: string): Promise<Team[]> => {
+  const response = await axios.get(
+    `https://www.thebluealliance.com/api/v3/event/${eventKey}/teams`,
     {
       headers: {
         "X-TBA-Auth-Key":
@@ -32,12 +44,21 @@ function App2() {
   const { data, isLoading, isError, refetch } = useQuery("matches", () =>
     fetchData(eventKey)
   );
+  const {
+    data: teamsData,
+    isLoading: teamsIsLoading,
+    isError: teamsIsError,
+    refetch: teamsRefetch,
+  } = useQuery("teams", () => fetchTeams(eventKey));
 
   const handleClick = async () => {
     refetch();
+    teamsRefetch();
   };
 
   const [output, setOutput] = useState("loading...");
+
+  const [teamInfo, setTeamInfo] = useState("loading...");
 
   useEffect(() => {
     if (data !== undefined) {
@@ -65,6 +86,20 @@ function App2() {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (teamsData !== undefined) {
+      setTeamInfo(
+        ["Team Number,Team Name"]
+          .concat(
+            teamsData
+              .sort((t1, t2) => t1.team_number - t2.team_number)
+              .map((t) => [t.team_number, t.nickname].join(","))
+          )
+          .join("\n")
+      );
+    }
+  }, [teamsData]);
+
   return (
     <div className="App">
       <label htmlFor="eventKey">Event Key</label>
@@ -75,12 +110,13 @@ function App2() {
         type={"text"}
       />
       <button onClick={handleClick}>Generate</button>
-
       <br />
       <br />
       {isLoading && <div>Loading</div>}
       {isError && <div>Error fetching data</div>}
+      <textarea cols={40} rows={55} value={teamInfo} /> <br />
       <textarea cols={40} rows={120} value={output} />
+      <br />
     </div>
   );
 }

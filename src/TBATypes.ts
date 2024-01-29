@@ -22,3 +22,24 @@ export interface Alliance {
   surrogate_team_keys: any[];
   team_keys: string[];
 }
+
+export interface Team {
+  address: any;
+  city: string;
+  country: string;
+  gmaps_place_id: any;
+  gmaps_url: any;
+  key: string;
+  lat: any;
+  lng: any;
+  location_name: any;
+  motto: any;
+  name: string;
+  nickname: string;
+  postal_code?: string;
+  rookie_year: number;
+  school_name: string;
+  state_prov: string;
+  team_number: number;
+  website?: string;
+}
