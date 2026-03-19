@@ -9,6 +9,7 @@ export interface MatchSimple {
   set_number: number;
   time: number;
   winning_alliance: string;
+  score_breakdown: any;
 }
 
 export interface ColoredAlliances {
